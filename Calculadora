@@ -1,0 +1,175 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sympy import symbols, diff, integrate, sqrt, lambdify, cos, sin, pi
+
+class CalculadoraVectores:
+    @staticmethod
+    def suma_vectores(v1, v2):
+        return np.add(v1, v2)
+
+    @staticmethod
+    def resta_vectores(v1, v2):
+        return np.subtract(v1, v2)
+
+    @staticmethod
+    def producto_punto(v1, v2):
+        return np.dot(v1, v2)
+
+    @staticmethod
+    def producto_cruz(v1, v2):
+        return np.cross(v1, v2)
+
+    @staticmethod
+    def graficar_vectores(vectores, etiquetas=None):
+        plt.figure()
+        origen = [0, 0, 0]  # punto de origen
+        for i, vector in enumerate(vectores):
+            etiqueta = etiquetas[i] if etiquetas else f"Vector {i+1}"
+            plt.quiver(*origen, *vector, angles='xy', scale_units='xy', scale=1, label=etiqueta)
+        
+        plt.axhline(0, color='black', linewidth=0.5)
+        plt.axvline(0, color='black', linewidth=0.5)
+        plt.grid(color='gray', linestyle='--', linewidth=0.5)
+        plt.legend()
+        plt.show()
+
+    @staticmethod
+    def graficar_producto_cruz(v1, v2):
+        cruz = CalculadoraVectores.producto_cruz(v1, v2)
+        CalculadoraVectores.graficar_vectores([v1, v2, cruz], etiquetas=["v1", "v2", "Producto Cruz"])
+
+    @staticmethod
+    def graficar_curva_parametrica(x_expr, y_expr, rango_t):
+        if len(rango_t) != 2:
+            print("Error: El rango para t debe contener exactamente dos valores: inicio y fin.")
+            return
+        try:
+            t = symbols('t')
+            funcion_x = lambdify(t, x_expr)
+            funcion_y = lambdify(t, y_expr)
+            
+            valores_t = np.linspace(rango_t[0], rango_t[1], 500)
+            valores_x = funcion_x(valores_t)
+            valores_y = funcion_y(valores_t)
+            
+            plt.plot(valores_x, valores_y)
+            plt.title('Curva Paramétrica')
+            plt.xlabel('x')
+            plt.ylabel('y')
+            plt.grid()
+            plt.show()
+        except Exception as e:
+            print(f"Error al graficar la curva paramétrica: {e}")
+
+    @staticmethod
+    def graficar_curva_polar(r_expr, rango_theta):
+        if len(rango_theta) != 2:
+            print("Error: El rango para theta debe contener exactamente dos valores: inicio y fin.")
+            return
+        try:
+            theta = symbols('theta')
+            funcion_r = lambdify(theta, r_expr)
+            
+            valores_theta = np.linspace(rango_theta[0], rango_theta[1], 500)
+            valores_r = funcion_r(valores_theta)
+            
+            plt.polar(valores_theta, valores_r)
+            plt.title('Curva Polar')
+            plt.show()
+        except Exception as e:
+            print(f"Error al graficar la curva polar: {e}")
+
+    @staticmethod
+    def longitud_arco_parametrico(x_expr, y_expr, rango_t):
+        if len(rango_t) != 2:
+            print("Error: El rango para t debe contener exactamente dos valores: inicio y fin.")
+            return
+        try:
+            t = symbols('t')
+            dx_dt = diff(x_expr, t)
+            dy_dt = diff(y_expr, t)
+            
+            integrando = sqrt(dx_dt**2 + dy_dt**2)
+            longitud_arco = integrate(integrando, (t, rango_t[0], rango_t[1]))
+            
+            return longitud_arco.evalf()
+        except Exception as e:
+            print(f"Error al calcular la longitud del arco: {e}")
+            return None
+
+def main():
+    calculadora = CalculadoraVectores()
+
+    while True:
+        print("\nMenú Calculadora de Vectores")
+        print("1. Suma de Vectores")
+        print("2. Resta de Vectores")
+        print("3. Producto Punto")
+        print("4. Producto Cruz")
+        print("5. Graficar Vectores")
+        print("6. Graficar Curva Paramétrica")
+        print("7. Graficar Curva Polar")
+        print("8. Calcular Longitud de Arco Paramétrico")
+        print("9. Salir")
+
+        opcion = input("Elige una opción: ")
+
+        if opcion == '1':
+            v1 = list(map(float, input("Ingresa el primer vector (separado por comas): ").split(',')))
+            v2 = list(map(float, input("Ingresa el segundo vector (separado por comas): ").split(',')))
+            print("Suma:", calculadora.suma_vectores(v1, v2))
+
+        elif opcion == '2':
+            v1 = list(map(float, input("Ingresa el primer vector (separado por comas): ").split(',')))
+            v2 = list(map(float, input("Ingresa el segundo vector (separado por comas): ").split(',')))
+            print("Resta:", calculadora.resta_vectores(v1, v2))
+
+        elif opcion == '3':
+            v1 = list(map(float, input("Ingresa el primer vector (separado por comas): ").split(',')))
+            v2 = list(map(float, input("Ingresa el segundo vector (separado por comas): ").split(',')))
+            print("Producto Punto:", calculadora.producto_punto(v1, v2))
+
+        elif opcion == '4':
+            v1 = list(map(float, input("Ingresa el primer vector (separado por comas): ").split(',')))
+            v2 = list(map(float, input("Ingresa el segundo vector (separado por comas): ").split(',')))
+            print("Producto Cruz:", calculadora.producto_cruz(v1, v2))
+
+        elif opcion == '5':
+            num_vectores = int(input("Ingresa el número de vectores: "))
+            vectores = []
+            for i in range(num_vectores):
+                vector = list(map(float, input(f"Ingresa el vector {i+1} (separado por comas): ").split(',')))
+                vectores.append(vector)
+            calculadora.graficar_vectores(vectores)
+
+        elif opcion == '6':
+            t = symbols('t')
+            x_expr = input("Ingresa la expresión de x(t): ")
+            y_expr = input("Ingresa la expresión de y(t): ")
+            rango_t = list(map(float, input("Ingresa el rango para t (inicio,fin): ").split(',')))
+            calculadora.graficar_curva_parametrica(eval(x_expr), eval(y_expr), rango_t)
+
+        elif opcion == '7':
+            theta = symbols('theta')
+            r_expr = input("Ingresa la expresión de r(theta): ")
+            rango_theta = list(map(float, input("Ingresa el rango para theta (inicio,fin): ").split(',')))
+            calculadora.graficar_curva_polar(eval(r_expr), rango_theta)
+
+        elif opcion == '8':
+            t = symbols('t')
+            x_expr = input("Ingresa la expresión de x(t): ")
+            y_expr = input("Ingresa la expresión de y(t): ")
+            rango_t = list(map(float, input("Ingresa el rango para t (inicio,fin): ").split(',')))
+            longitud_arco = calculadora.longitud_arco_parametrico(eval(x_expr), eval(y_expr), rango_t)
+            if longitud_arco is not None:
+                print("Longitud del Arco:", longitud_arco)
+
+        elif opcion == '9':
+            print("Saliendo del programa.")
+            break
+
+        else:
+            print("Opción inválida. Intenta de nuevo.")
+
+if __name__ == "__main__":
+    main()
